@@ -5,10 +5,10 @@ This is a simple fullstack calculator built using Vue.js, ASP.NET Core, and Enti
 ## Installation and Setup
 
 1. Clone the repository
-2. Navigate to the `calculator/backend` folder and run `dotnet build` to build the backend
-3. Navigate to the `calculator/client` folder and run `npm install` to install the dependencies for the frontend
-4. Start the backend by running `dotnet run` from the `calculator` folder
-5. Start the frontend by running `npm run serve` from the `calculator/client` folder
+2. Navigate to the `CalculatorVue3/backend` folder and run `dotnet build` to build the backend
+3. Navigate to the `CalculatorVue3/frontend` folder and run `npm install` to install the dependencies for the frontend
+4. Start the backend by running `dotnet run` from the `backend` folder
+5. Start the frontend by running `npm run serve` from the `calculator/frontend` folder
 6. Access the app at `http://localhost:8080`
 
 ## Features
