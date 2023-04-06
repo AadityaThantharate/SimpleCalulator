@@ -7,56 +7,31 @@
       <CalcButton label="History" @click="handleButtonClick('History')" class="double-width"></CalcButton>
       <CalcButton label="Clear History" @click="handleButtonClick('Clear History')" class="double-width"></CalcButton>
     </div>
-    <div v-if="showHistoryModal" class="modal is-active">
-      <div class="modal-background" @click="showHistoryModal = false"></div>
-      <div class="modal-card">
-        <header class="modal-card-head">
-          <p class="modal-card-title">Calculation History</p>
-        </header>
-        <section class="modal-card-body">
-          <table class="table is-striped is-hoverable is-fullwidth">
-            <thead>
-              <tr>
-                <th>Exp</th>
-                <th>Result</th>
-                <th>Delete</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(record, index) in historyRecords" :key="index">
-                <td>{{ record.expression }}</td>
-                <td>{{ record.result }}</td>
-                <td>
-                  <i class="fas fa-trash-alt delete-history" @click="deleteHistoryRecord(record.id)"></i>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </section>
-
-        <footer class="modal-card-foot">
-          <button class="button" @click="showHistoryModal = false">Close</button>
-        </footer>
-      </div>
-    </div>
+    <HistoryModal :showModal="showModal" @update:showModal="showModal = $event" />
   </div>
 </template>
+
   
 <script>
-import CalcButton from '@/components/CalcButton.vue';
-import calculationHistoryService from '@/services/calculationHistoryService';
+import CalcButton from './CalcButton.vue';
+import HistoryModal from './HistoryModal.vue';
+import calculationHistoryService from '../services/calculationHistoryService';
 import * as math from 'mathjs';
+import Button from 'primevue/button';
+import Dialog from 'primevue/dialog';
 
 export default {
   name: 'CalculatorButtons',
   components: {
     CalcButton,
+    HistoryModal,
+    'p-button': Button,
+    'p-dialog': Dialog,
   },
   data() {
     return {
       expression: '',
-      showHistoryModal: false,
-      historyRecords: [],
+      showModal: false,
       buttons: [
         { label: '7', action: '7' },
         { label: '8', action: '8' },
@@ -78,17 +53,6 @@ export default {
     };
   },
   methods: {
-    async fetchHistory() {
-      this.historyRecords = await calculationHistoryService.getAllHistory();
-    },
-    async deleteHistoryRecord(id) {
-      await calculationHistoryService.deleteHistoryById(id);
-      await this.fetchHistory();
-    },
-    async deleteAllHistoryRecords() {
-      await calculationHistoryService.deleteAllHistory();
-      await this.fetchHistory();
-    },
     async handleEquals() {
       try {
         const result = this.evaluateExpression(this.expression);
@@ -111,11 +75,10 @@ export default {
       this.expression = '';
     },
     async handleHistory() {
-      this.showHistoryModal = true;
-      await this.fetchHistory();
+      this.showModal = true;
     },
     async handleClearHistory() {
-      await this.deleteAllHistoryRecords();
+      await calculationHistoryService.deleteAllHistory();
     },
     isOperator(char) {
       return ['+', '-', '*', '/'].includes(char);
@@ -193,67 +156,11 @@ export default {
   grid-column-end: span 2;
 }
 
-.modal {
-  align-items: center;
-  display: flex;
-  height: 100%;
-  justify-content: center;
-  left: 0;
-  position: fixed;
-  top: 0;
-  width: 100%;
-  z-index: 40;
-}
-
-.modal.is-active {
-  z-index: 2000;
-}
-
-.modal-background {
-  background-color: rgba(10, 10, 10, 0.86);
-  height: 100%;
-  left: 0;
-  position: absolute;
-  top: 0;
-  width: 100%;
-}
-
-.modal-card {
-  background-color: #fff;
-  border-radius: 6px;
-  box-shadow: 0 10px 20px rgba(10, 10, 10, 0.19), 0 6px 6px rgba(10, 10, 10, 0.23);
-  max-width: 500px;
-  position: relative;
-  width: auto;
-}
-
-.modal-card-head,
-.modal-card-foot {
-  align-items: center;
-  background-color: #f5f5f5;
-  display: flex;
-  flex-shrink: 0;
-  justify-content: flex-start;
-  padding: 20px;
-}
-
-.modal-card-title {
-  flex-grow: 1;
-  flex-shrink: 0;
-  font-size: 1.5rem;
-  line-height: 1;
-}
-
-.modal-card-body {
-  overflow-y: auto;
-  padding: 20px;
-  max-height: 400px;
-}
-
 .table {
   font-size: 0.9rem;
   margin: auto;
 }
+
 .table thead {
   background-color: #f5f5f5;
 }
@@ -261,6 +168,7 @@ export default {
 .table tbody tr:hover {
   background-color: #f5f5f5;
 }
+
 .delete-history {
   cursor: pointer;
   margin-left: 8px;
@@ -270,6 +178,7 @@ export default {
 .delete-history:hover {
   color: #2e2e2e;
 }
+
 th {
   width: 4rem;
 }
